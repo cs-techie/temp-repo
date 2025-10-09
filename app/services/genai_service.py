@@ -1,5 +1,5 @@
 import uuid
-from ..utils.redis_client import get_redis
+from ..utils.helpers import get_redis
 from ..config import settings
 from sqlalchemy.orm import Session
 from ..models import Mentor
@@ -45,7 +45,7 @@ async def book_slot(mentor_id: int, slot_id: str):
                 db.add(mentor)
                 db.commit()
                 # update ES index asynchronously (simpler: call update here)
-                from ..services.indexer import update_availability
+                from ..services.ml_service import update_availability
                 update_availability(str(mentor_id), availability)
                 return {"ok": True}
         return {"ok": False, "reason": "slot_not_found"}

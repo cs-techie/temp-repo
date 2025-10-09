@@ -2,12 +2,15 @@ from fastapi import APIRouter, HTTPException
 from typing import Any
 
 from ..schemas import SearchRequest
-from ..utils.es_client import get_es_client
-from ..utils.redis_client import get_redis
+from ..utils.helpers import get_es_client, get_redis
 from ..config import settings
 import json, hashlib
 
 router = APIRouter()
+
+@router.get("/health")
+async def health():
+    return {"status": "ok"}
 
 def fingerprint(obj: dict) -> str:
     normalized = json.dumps(obj, sort_keys=True, separators=(',', ':'))
@@ -49,5 +52,6 @@ async def search_mentors(body: SearchRequest):
     res = es.search(index=settings.MENTOR_INDEX, body=body_dict)
     hits = [{**hit.get('_source', {}), '_score': hit.get('_score'), '_id': hit.get('_id')} for hit in res['hits']['hits']]
     out = {'total': res['hits']['total']['value'], 'page': body.page, 'size': body.size, 'results': hits}
-    await redis.set(key, json.dumps(out), ex=settings.CACHE_TTL_SECONDS)
+    await redis.set(key, json.dumps(out))
+    await redis.expire(key, settings.CACHE_TTL_SECONDS)
     return out

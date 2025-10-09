@@ -1,6 +1,6 @@
 import json
 from elasticsearch import helpers
-from ..utils.es_client import get_es_client
+from ..utils.helpers import get_es_client
 from ..config import settings
 
 es = get_es_client()
@@ -24,8 +24,11 @@ MENTOR_MAPPING = {
 
 def create_index_if_not_exists(index_name: str = None):
     name = index_name or settings.MENTOR_INDEX
-    if not es.indices.exists(index=name):
-        es.indices.create(index=name, body=MENTOR_MAPPING)
+    try:
+        es.indices.create(index=name, mappings=MENTOR_MAPPING["mappings"])
+    except Exception as e:
+        if "resource_already_exists_exception" not in str(e):
+            raise
 
 def bulk_index(docs_iterable):
     helpers.bulk(es, docs_iterable)

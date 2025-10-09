@@ -1,10 +1,10 @@
 """
 Simple reindex script: reads mentors from DB and bulk indexes.
-Run: python scripts/reindex.py
+Run: python migrations/reindex.py
 """
 from app.database import SessionLocal
 from app.models import Mentor
-from app.services.indexer import create_index_if_not_exists, bulk_index
+from app.services.ml_service import create_index_if_not_exists, bulk_index
 
 def transform(m: Mentor):
     return {
