@@ -1,5 +1,4 @@
-# temp-repo
->>>>>>> 0d0b853b98eb9883cd55182f975710dff900a287
+
 =======
 # Mentor Search Backend
 
@@ -131,5 +130,4 @@ This project is licensed under the MIT License.
 
 For questions or support, please contact the maintainers.
 =======
-# temp-repo
->>>>>>> 0d0b853b98eb9883cd55182f975710dff900a287
+
