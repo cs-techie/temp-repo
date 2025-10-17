@@ -3,10 +3,13 @@ from ..config import settings
 
 _es = None
 
-def get_es_client() -> Elasticsearch:
+def get_es_client():
     global _es
     if _es is None:
-        _es = Elasticsearch(settings.ES_URL)
+        try:
+            _es = Elasticsearch(settings.ES_URL)
+        except Exception:
+            _es = None
     return _es
 
 import aioredis
@@ -17,5 +20,8 @@ _redis = None
 async def get_redis():
     global _redis
     if _redis is None:
-        _redis = await aioredis.create_redis_pool(settings.REDIS_URL, encoding="utf-8")
+        try:
+            _redis = await aioredis.create_redis_pool(settings.REDIS_URL, encoding="utf-8")
+        except Exception:
+            _redis = None
     return _redis

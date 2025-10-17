@@ -21,7 +21,6 @@ async def search_mentors(body: SearchRequest):
     if body.size > 50:
         raise HTTPException(status_code=400, detail='size must be <= 50')
 
-    es = get_es_client()
     redis = await get_redis()
 
     es_query = {'bool': {'must': [], 'filter': []}}
@@ -45,13 +44,29 @@ async def search_mentors(body: SearchRequest):
             body_dict['sort'] = [{field: {'order': order}}]
 
     key = fingerprint(body_dict)
-    cached = await redis.get(key)
+    cached = None
+    if redis is not None:
+        try:
+            cached = await redis.get(key)
+        except Exception:
+            pass
     if cached:
         return json.loads(cached)
 
-    res = es.search(index=settings.MENTOR_INDEX, body=body_dict)
-    hits = [{**hit.get('_source', {}), '_score': hit.get('_score'), '_id': hit.get('_id')} for hit in res['hits']['hits']]
-    out = {'total': res['hits']['total']['value'], 'page': body.page, 'size': body.size, 'results': hits}
-    await redis.set(key, json.dumps(out))
-    await redis.expire(key, settings.CACHE_TTL_SECONDS)
+    es = get_es_client()
+    if es is None:
+        out = {'total': 0, 'page': body.page, 'size': body.size, 'results': []}
+    else:
+        try:
+            res = es.search(index=settings.MENTOR_INDEX, body=body_dict)
+            hits = [{**hit.get('_source', {}), '_score': hit.get('_score'), '_id': hit.get('_id')} for hit in res['hits']['hits']]
+            out = {'total': res['hits']['total']['value'], 'page': body.page, 'size': body.size, 'results': hits}
+        except Exception:
+            out = {'total': 0, 'page': body.page, 'size': body.size, 'results': []}
+    if redis is not None:
+        try:
+            await redis.set(key, json.dumps(out))
+            await redis.expire(key, settings.CACHE_TTL_SECONDS)
+        except Exception:
+            pass
     return out
