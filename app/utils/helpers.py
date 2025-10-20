@@ -4,10 +4,11 @@ from ..config import settings
 _es = None
 
 def get_es_client() -> Elasticsearch:
-    global _es
-    if _es is None:
-        _es = Elasticsearch(settings.ES_URL)
-    return _es
+    return Elasticsearch(
+        settings.ES_URL,  # "https://localhost:9200"
+        basic_auth=(settings.ES_USER, settings.ES_PASS),
+        verify_certs=False  # for local testing only
+    )
 
 import aioredis
 from ..config import settings
