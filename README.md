@@ -6,16 +6,25 @@ Short: Search infra for mentors using FastAPI + Elasticsearch + Redis
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Folder Structure](#folder-structure)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+- [Mentor Search Backend](#mentor-search-backend)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Folder Structure](#folder-structure)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+  - [Usage](#usage)
+  - [API Endpoints](#api-endpoints)
+    - [POST /search/mentors](#post-searchmentors)
+  - [Testing](#testing)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Contact](#contact)
+- [For questions or support, please contact the maintainers.](#for-questions-or-support-please-contact-the-maintainers)
+- [Ashkan Added](#ashkan-added)
+  - [run redis](#run-redis)
+  - [run ellasticSearch](#run-ellasticsearch)
+  - [run fastapi app](#run-fastapi-app)
+  - [if you still get error because there is no mentor field add it with curl command in console](#if-you-still-get-error-because-there-is-no-mentor-field-add-it-with-curl-command-in-console)
 
 ## Overview
 
@@ -131,3 +140,38 @@ This project is licensed under the MIT License.
 For questions or support, please contact the maintainers.
 =======
 
+
+# Ashkan Added
+
+## run redis
+```bash
+docker run -p 6379:6379 redis
+```
+
+## run ellasticSearch
+```bash
+docker run -d --name elasticsearch -e "discovery.type=single-node" -e "ELASTIC_PASSWORD=changeme" -p 9200:9200 docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+```
+
+## run fastapi app
+```bash
+uvicorn main:app --reload
+```
+
+## if you still get error because there is no mentor field add it with curl command in console
+```bash
+curl -k -u elastic:changeme -X PUT "https://localhost:9200/mentors" -H 'Content-Type: application/json' -d'
+{
+  "mappings": {
+    "properties": {
+      "name": { "type": "text" },
+      "bio": { "type": "text" },
+      "skills": { "type": "keyword" },
+      "location": { "properties": { "city": { "type": "keyword" } } },
+      "experience_years": { "type": "integer" },
+      "rating": { "type": "float" }
+    }
+  }
+}
+'
+```

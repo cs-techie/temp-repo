@@ -21,10 +21,10 @@ class MentorOut(BaseModel):
 
 class SearchRequest(BaseModel):
     q: Optional[str] = ""
-    skills: Optional[List[str]] = []
+    skills: List[str] = []
     city: Optional[str] = None
-    min_experience: Optional[int] = None
-    min_rating: Optional[float] = None
+    min_experience: Optional[int] = 0
+    min_rating: Optional[int] = 0
     page: int = 1
     size: int = 10
     sort_by: Optional[str] = None
